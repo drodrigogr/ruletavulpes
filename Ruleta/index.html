@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ruleta de los Vulpes</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
 <style>
 body {
   margin: 0;
@@ -12,10 +13,21 @@ body {
   color: white;
   text-align: center;
 }
-#logo {
-  width: min(90vw, 600px);
+
+#titulo {
+  font-family: 'Bangers', cursive;
+  font-size: 60px;
+  text-align: center;
   margin: 20px 0;
+  color: #ff0077;
+  text-shadow: 2px 2px 5px #000;
 }
+@media (max-width: 600px) {
+  #titulo {
+    font-size: 40px;
+  }
+}
+
 canvas {
   display: block;
   margin: auto;
@@ -24,6 +36,7 @@ canvas {
   background: transparent;
   border-radius: 50%;
 }
+
 button {
   font-size: 32px;
   padding: 20px 40px;
@@ -39,6 +52,7 @@ button {
 button:hover {
   background: #ffc107;
 }
+
 #overlay {
   display: none;
   position: fixed;
@@ -50,6 +64,7 @@ button:hover {
   align-items: center;
   flex-direction: column;
 }
+
 #overlay h1 {
   font-size: 60px;
   margin: 20px;
@@ -58,7 +73,7 @@ button:hover {
 </head>
 <body>
 
-<img id="logo" src="titulo-vulpes.png" alt="Ruleta de los Vulpes">
+<div id="titulo">RULETA DE LOS VULPES</div>
 <canvas id="wheel"></canvas>
 <button id="spinButton">🎉 GIRAR 🎉</button>
 
@@ -159,10 +174,7 @@ document.getElementById('spinButton').onclick = () => {
 function getResult() {
   const normalizedAngle = (2 * Math.PI - (angle + Math.PI / 2)) % (2 * Math.PI);
   let index = Math.floor(normalizedAngle / arc) % options.length;
-  
-  // Corrección para prevenir resultados inválidos
   if (index < 0 || index >= options.length || !options[index]) index = 0;
-
   return options[index];
 }
 
@@ -170,6 +182,7 @@ function showOverlay(result) {
   finalResult.textContent = result.toUpperCase();
   overlay.style.display = 'flex';
 }
+
 function closeOverlay() {
   overlay.style.display = 'none';
 }
@@ -177,6 +190,7 @@ function closeOverlay() {
 
 </body>
 </html>
+
 
 
 
