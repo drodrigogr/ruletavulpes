@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruleta de los Vulpes</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #3f51b5, #2196f3);
+  color: white;
+  text-align: center;
+}
+
+#titulo {
+  font-family: 'Bangers', cursive;
+  font-size: 60px;
+  text-align: center;
+  margin: 20px 0;
+  color: #ff0077;
+  text-shadow: 2px 2px 5px #000;
+}
+@media (max-width: 600px) {
+  #titulo {
+    font-size: 40px;
+  }
+}
+
+canvas {
+  display: block;
+  margin: auto;
+  width: min(90vw, 600px);
+  height: auto;
+  background: transparent;
+  border-radius: 50%;
+}
+
+button {
+  font-size: 32px;
+  padding: 20px 40px;
+  margin: 20px;
+  background: #ff9800;
+  border: none;
+  border-radius: 15px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  background: #ffc107;
+}
+
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#overlay h1 {
+  font-size: 60px;
+  margin: 20px;
+}
+</style>
+</head>
+<body>
+
+<div id="titulo">RULETA DE LOS VULPES</div>
+<canvas id="wheel"></canvas>
+<button id="spinButton">🎉 GIRAR 🎉</button>
+
+<div id="overlay">
+  <h1 id="finalResult"></h1>
+  <button onclick="closeOverlay()">Volver</button>
+</div>
+
+<script>
+const options = [
+  "Chupito doble", "Regalo al de la izquierda",
+  "Bebe y pasa", "Reto ridículo",
+  "Canta una canción", "Bailoteo 10 seg",
+  "Chupito sin manos", "Sortea tu bebida",
+  "Reto grupal", "Elige quién bebe"
+];
+
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const finalResult = document.getElementById('finalResult');
+
+let angle = 0;
+let radius = 0;
+const arc = 2 * Math.PI / options.length;
+
+function resize() {
+  const size = Math.min(window.innerWidth * 0.9, 600);
+  canvas.width = canvas.height = size;
+  radius = size / 2;
+  draw();
+}
+window.addEventListener('resize', resize);
+resize();
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const center = radius;
+  for (let i = 0; i < options.length; i++) {
+    ctx.beginPath();
+    ctx.fillStyle = i % 2 ? '#e91e63' : '#9c27b0';
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, angle + i * arc, angle + (i + 1) * arc);
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(angle + (i + 0.5) * arc);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'right';
+
+    let fontSize = radius / 14;
+    ctx.font = `${fontSize}px Arial`;
+    let text = options[i];
+    let textWidth = ctx.measureText(text).width;
+    while (textWidth > radius - 20 && fontSize > 8) {
+      fontSize--;
+      ctx.font = `${fontSize}px Arial`;
+      textWidth = ctx.measureText(text).width;
+    }
+    ctx.fillText(text, radius - 10, 10);
+    ctx.restore();
+  }
+
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.moveTo(center, 10);
+  ctx.lineTo(center - 15, 40);
+  ctx.lineTo(center + 15, 40);
+  ctx.closePath();
+  ctx.fill();
+}
+
+document.getElementById('spinButton').onclick = () => {
+  const spins = Math.random() * 3000 + 4000;
+  const start = performance.now();
+  const duration = 6000;
+  const initialAngle = angle;
+  const finalAngle = initialAngle + spins / radius;
+
+  function animate(now) {
+    let elapsed = now - start;
+    if (elapsed < duration) {
+      let progress = elapsed / duration;
+      let easeOut = 1 - Math.pow(1 - progress, 3);
+      angle = initialAngle + (spins / radius) * easeOut;
+      draw();
+      requestAnimationFrame(animate);
+    } else {
+      angle = finalAngle % (2 * Math.PI);
+      draw();
+      showOverlay(getResult());
+    }
+  }
+  requestAnimationFrame(animate);
+};
+
+function getResult() {
+  const normalizedAngle = (2 * Math.PI - (angle + Math.PI / 2)) % (2 * Math.PI);
+  let index = Math.floor(normalizedAngle / arc) % options.length;
+  if (index < 0 || index >= options.length || !options[index]) index = 0;
+  return options[index];
+}
+
+function showOverlay(result) {
+  finalResult.textContent = result.toUpperCase();
+  overlay.style.display = 'flex';
+}
+
+function closeOverlay() {
+  overlay.style.display = 'none';
+}
+</script>
+
+</body>
+</html>
